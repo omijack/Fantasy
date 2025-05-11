@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("S'ha fet submit"); // afegeix això
     const res = await fetch('http://localhost:3001/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -15,8 +17,15 @@ export default function Login() {
 
     const data = await res.json();
     if (res.ok) {
-      alert('Login correcte!');
-      // Redirigir o guardar userId/token
+      // ✅ Guardar usuari i diners a localStorage
+      localStorage.setItem('user', JSON.stringify({
+        name: username,
+        userId: data.userId,
+        money: 20000000 // 20 milions
+      }));
+
+      // ✅ Redirigir a la pàgina principal
+      navigate('/');
     } else {
       alert(data.error || 'Error de login');
     }
@@ -68,49 +77,3 @@ const styles = {
     borderRadius: '4px', cursor: 'pointer'
   }
 };
-
-
-// src/App.jsx
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Layout from './components/Layout';
-import Classificacio from './pages/Classificacio';
-import Alineacio from './pages/Alineacio';
-import Mercat from './pages/Mercat';
-
-// Component de ruta protegida
-function RequireAuth({ children }) {
-  const user = localStorage.getItem('user');
-  if (!user) {
-    // Si no hi ha usuari, redirigeix al login
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-}
-
-function App() {
-  return (
-    <Routes>
-      {/* Ruta pública de Login */}
-      <Route path="/login" element={<Login />} />
-      
-      {/* Ruta protegida amb layout aplicat */}
-      <Route 
-        path="/" 
-        element={
-          <RequireAuth>
-            <Layout />
-          </RequireAuth>
-        }
-      >
-        {/* Rutes filles dins del layout */}
-        <Route index element={<Navigate to="/classificacio" />} />
-        <Route path="classificacio" element={<Classificacio />} />
-        <Route path="alineacio" element={<Alineacio />} />
-        <Route path="mercat" element={<Mercat />} />
-      </Route>
-    </Routes>
-  );
-}
-
-export default App;
