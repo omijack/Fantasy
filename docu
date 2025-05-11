@@ -1,0 +1,25 @@
+\\registre usuari
+curl -X POST http://localhost:3001/api/register \
+-H "Content-Type: application/json" \
+-d '{"username": "omar", "password": "1234"}'
+
+\\ login usuari
+curl -X POST http://localhost:3001/api/login \
+-H "Content-Type: application/json" \
+-d '{"username": "omar", "password": "1234"}'
+
+
+\\ crea una lliga
+curl -X POST http://localhost:3001/api/create-league \
+-H "Content-Type: application/json" \
+-d '{"name": "Lliga Fantasy Pro", "userId": 1}'
+
+\\afegir usuari a una lliga
+curl -X POST http://localhost:3001/api/join-league \
+-H "Content-Type: application/json" \
+-d '{"userId": 2, "leagueId": 1}'
+
+\\assignar jugadors a usuari
+curl -X POST http://localhost:3001/api/assign-players \
+-H "Content-Type: application/json" \
+-d '{"userId": 2, "leagueId": 1}'

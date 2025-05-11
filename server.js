@@ -109,6 +109,75 @@ app.post('/api/join-league', async (req, res) => {
   }
 });
 
+//Asignar Equip
+app.post('/api/assign-players', async (req, res) => {
+  const { userId, leagueId } = req.body;
+
+  try {
+    // 1. Jugadors ja assignats en aquesta lliga
+    const assigned = await db.query(
+      `SELECT player_id FROM user_players WHERE league_id = $1`,
+      [leagueId]
+    );
+    const assignedIds = assigned.rows.map(row => row.player_id);
+    const assignedFilter = assignedIds.length > 0 ? `WHERE id NOT IN (${assignedIds.join(',')})` : '';
+
+    // Helper per seleccionar jugadors per posició
+    async function selectPlayersByPosition(position, limit) {
+      const query = `
+        SELECT id FROM players
+        WHERE general_position = $1
+        ${assignedIds.length > 0 ? `AND id NOT IN (${assignedIds.join(',')})` : ''}
+        ORDER BY RANDOM() LIMIT $2
+      `;
+      const result = await db.query(query, [position, limit]);
+      return result.rows.map(r => r.id);
+    }
+
+    // 2. Seleccionar segons posicions
+    const goalkeepers = await selectPlayersByPosition('Goalkeeper', 1);
+    const defences = await selectPlayersByPosition('Defence', 4);
+    const midfields = await selectPlayersByPosition('Midfield', 3);
+    const offences = await selectPlayersByPosition('Offence', 3);
+
+    const selectedIds = [
+      ...goalkeepers,
+      ...defences,
+      ...midfields,
+      ...offences
+    ];
+
+    // 3. Omplir amb 2 jugadors extra de qualsevol posició
+    const extraQuery = `
+      SELECT id FROM players
+      ${assignedFilter}
+      AND id NOT IN (${selectedIds.join(',')})
+      ORDER BY RANDOM() LIMIT 2
+    `;
+    const extra = await db.query(extraQuery);
+    selectedIds.push(...extra.rows.map(r => r.id));
+
+    // 4. Comprovem si n'hi ha 13
+    if (selectedIds.length < 13) {
+      return res.status(400).json({ error: 'No hi ha prou jugadors disponibles per complir el repartiment' });
+    }
+
+    // 5. Inserim a user_players
+    for (const playerId of selectedIds) {
+      await db.query(
+        'INSERT INTO user_players (user_id, league_id, player_id) VALUES ($1, $2, $3)',
+        [userId, leagueId, playerId]
+      );
+    }
+
+    res.status(201).json({ message: 'Equip assignat correctament', playerIds: selectedIds });
+
+  } catch (err) {
+    console.error('❌ Error assignant equip:', err);
+    res.status(500).json({ error: 'Error intern' });
+  }
+});
+
 app.listen(3001, () => {
   console.log('Servidor en marxa a http://localhost:3001');
 });
