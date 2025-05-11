@@ -1,7 +1,17 @@
+\\arrancar server backend
+node server.js
+
+\\ arrancar web
+npm run dev
+
+
+
+
+
 \\registre usuari
 curl -X POST http://localhost:3001/api/register \
 -H "Content-Type: application/json" \
--d '{"username": "omar", "password": "1234"}'
+-d '{"username": "aitana", "password": "1234"}'
 
 \\ login usuari
 curl -X POST http://localhost:3001/api/login \
@@ -23,3 +33,29 @@ curl -X POST http://localhost:3001/api/join-league \
 curl -X POST http://localhost:3001/api/assign-players \
 -H "Content-Type: application/json" \
 -d '{"userId": 2, "leagueId": 1}'
+
+
+
+\\SQL
+sudo -u postgres psql : accedir
+\c fantasy : obrir bd fantasy
+\dt : veure taules
+
+
+
+\\GIT
+inicialitza git : git init
+afegeix origen remot : git remote add origin https://github.com/omijack/Fantasy.git
+ignora fitxer .env : echo -e "node_modules/\n.env" > .gitignore
+
+
+BRANCH: cada branca és una versió diferent de repositori per guardar diferents canvis
+això anomena a la branca actual com a main: git branch -M main
+
+COMIT:
+git add .
+git commit -m "Primera versió del projecte Fantasy"
+
+
+PUSH
+git push -u origin main

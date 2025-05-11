@@ -114,15 +114,14 @@ app.post('/api/assign-players', async (req, res) => {
   const { userId, leagueId } = req.body;
 
   try {
-    // 1. Jugadors ja assignats en aquesta lliga
+    // 1. Jugadors ja assignats a qualsevol usuari dins d’aquesta lliga
     const assigned = await db.query(
       `SELECT player_id FROM user_players WHERE league_id = $1`,
       [leagueId]
     );
     const assignedIds = assigned.rows.map(row => row.player_id);
-    const assignedFilter = assignedIds.length > 0 ? `WHERE id NOT IN (${assignedIds.join(',')})` : '';
 
-    // Helper per seleccionar jugadors per posició
+    // Helper per seleccionar jugadors d'una posició
     async function selectPlayersByPosition(position, limit) {
       const query = `
         SELECT id FROM players
@@ -134,7 +133,7 @@ app.post('/api/assign-players', async (req, res) => {
       return result.rows.map(r => r.id);
     }
 
-    // 2. Seleccionar segons posicions
+    // 2. Selecció per posicions mínimes
     const goalkeepers = await selectPlayersByPosition('Goalkeeper', 1);
     const defences = await selectPlayersByPosition('Defence', 4);
     const midfields = await selectPlayersByPosition('Midfield', 3);
@@ -148,21 +147,29 @@ app.post('/api/assign-players', async (req, res) => {
     ];
 
     // 3. Omplir amb 2 jugadors extra de qualsevol posició
+    let whereClauses = [];
+
+    if (assignedIds.length > 0) {
+      whereClauses.push(`id NOT IN (${assignedIds.join(',')})`);
+    }
+    if (selectedIds.length > 0) {
+      whereClauses.push(`id NOT IN (${selectedIds.join(',')})`);
+    }
+
     const extraQuery = `
       SELECT id FROM players
-      ${assignedFilter}
-      AND id NOT IN (${selectedIds.join(',')})
+      ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}
       ORDER BY RANDOM() LIMIT 2
     `;
     const extra = await db.query(extraQuery);
     selectedIds.push(...extra.rows.map(r => r.id));
 
-    // 4. Comprovem si n'hi ha 13
+    // 4. Comprovació final
     if (selectedIds.length < 13) {
-      return res.status(400).json({ error: 'No hi ha prou jugadors disponibles per complir el repartiment' });
+      return res.status(400).json({ error: 'No hi ha prou jugadors disponibles per complir els requisits' });
     }
 
-    // 5. Inserim a user_players
+    // 5. Inserir a la taula user_players
     for (const playerId of selectedIds) {
       await db.query(
         'INSERT INTO user_players (user_id, league_id, player_id) VALUES ($1, $2, $3)',
@@ -170,13 +177,18 @@ app.post('/api/assign-players', async (req, res) => {
       );
     }
 
-    res.status(201).json({ message: 'Equip assignat correctament', playerIds: selectedIds });
+    res.status(201).json({
+      message: 'Equip assignat correctament',
+      playerIds: selectedIds
+    });
 
   } catch (err) {
     console.error('❌ Error assignant equip:', err);
     res.status(500).json({ error: 'Error intern' });
   }
 });
+
+
 
 app.listen(3001, () => {
   console.log('Servidor en marxa a http://localhost:3001');
