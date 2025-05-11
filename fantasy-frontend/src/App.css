@@ -1,11 +1,132 @@
-body::before {
-  content: 'CSS OK';
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: red;
+/* App.css - estils globals moderns i nets */
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #fafafa;
+  color: #333;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  background-color: #0d47a1;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #1565c0;
+}
+
+input {
+  font-family: inherit;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+nav.sidebar {
+  background: #eceff1;
+  padding: 1rem;
+  min-width: 200px;
+  border-right: 1px solid #cfd8dc;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+nav.sidebar a {
+  display: block;
+  color: #455a64;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+nav.sidebar a.active {
+  background-color: #cfd8dc;
+  font-weight: bold;
+}
+
+header {
+  background: #263238;
   color: white;
-  padding: 4px;
-  font-size: 12px;
-  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.avatar {
+  background-color: #90caf9;
+  color: #0d47a1;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+}
+.layout-main {
+  display: flex;
+  min-height: 100vh;
+}
+
+.layout-content {
+  flex: 1;
+  padding: 2rem;
+  background: #fff8e1;
+  box-sizing: border-box;
+}
+nav.sidebar {
+  background: #eceff1;
+  padding: 1rem;
+  min-width: 200px;
+  border-right: 1px solid #cfd8dc;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+nav.sidebar a {
+  display: block;
+  color: #455a64;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+nav.sidebar a.active {
+  background-color: #cfd8dc;
+  font-weight: bold;
+}
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.money {
+  font-size: 0.9rem;
+  opacity: 0.9;
 }
